@@ -9,46 +9,46 @@ BTIL.f <- function(im, Informacion, NumMask){
   
   Dim <- dim(im)
   
-  #Cambiar a tonalidades de gris
+  # Change to grayscale
   colorMode(im) = Grayscale
   
-  #Cortar la parte de la zimografía que es de interés
+  # Part of the zymography that is of interest
   im_cut = im[1:Dim[1], 1:Ejey,1]
   
-  #Matriz de tonos de grises
+  # Grayscale matrix
   M <- imageData(im)[,,1]
   
-  #Encontrar los pixeles en las máscaras
+  # Pixels of the masks
   mask1 <- t(Informacion$mascaras[1:Ejey, 1:Dim[1], 1])
   for(w in 2:NumMask){
     mask <- t(Informacion$mascaras[1:Ejey, 1:Dim[1], w])
     mask1 <- mask1 + mask
   }
-  #Quitar los repetidos
+  # Remove the duplicates
   if(max(mask1)==2){
     val2 <- which(mask1 == 2, arr.ind=TRUE)
     mask1[val2]<-0
   }
-  #Pixeles del fondo
+  # Background pixels
   p_fondo <- which(mask1 == 0, arr.ind=TRUE)
   
-  #Pixeles de las máscaras
+  # Pixels of the masks
   p_mask <- which(mask1 == 1, arr.ind=TRUE)
   
-  #Tonos de gris de los pixeles de fondo
+  # Grayscale tones of background pixels
   dimpf <- dim(p_fondo)[1]
   Mpos <- NULL
   for(u in 1:dimpf){
     Mpos[u] <- M[p_fondo[u,1], p_fondo[u,2]]
   }
   
-  #Juntar la posición con su correspondiente tono en M	
+  # Pixel posicion with corresponding grayscale tone in M	
   FONDO <- cbind(p_fondo, Mpos)
   
-  #Para las esquinas de los pixeles de las máscaras
+  # Corners of the masks
   mM <- c(min(p_mask[,1]), max(p_mask[,1]), min(p_mask[,2]), max(p_mask[,2]))
   
-  #Discriminación de fondo
+  # Background
   fondo2 <- NULL
   fondo3 <- NULL
   indices <- which(FONDO[,1]>=mM[1] & FONDO[,1] <= mM[2])
