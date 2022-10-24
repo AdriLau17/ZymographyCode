@@ -1,10 +1,14 @@
-# Functions to obtain the Umbral value "Um" and the B value
-# im - Image
-# Informacion - Information about the image masks
-# NumMask - Number of masks 
+# Functions to obtain the threshold value "Um" and the "B" value
+#Inputs:
+#   im - Image
+#   Informacion - Information about the image masks
+#   NumMask - Number of masks 
+
 
 ################################################################################
-# Um value
+# Function to obtain the threshold value "Um"
+#Output: Um value
+
 P.Umbral <- function(im, Informacion, NumMask){
   im <- im
   Informacion <- Informacion 
@@ -15,10 +19,10 @@ P.Umbral <- function(im, Informacion, NumMask){
     mask <- mask + t(Informacion$mascaras[,, w])
   }
   
-  #Seleccionar las posiciones dentro de las máscaras
+  # Select the positions within the masks
   pos.pixels <- which(mask==1, arr.ind=TRUE)
   
-  #Matriz de tonos de grises
+  # Grayscale tone array
   M <- imageData(im)[,,1]
   #M <- imageData(im)
   
@@ -28,7 +32,7 @@ P.Umbral <- function(im, Informacion, NumMask){
     Mpos[u] <- M[pos.pixels[u,1], pos.pixels[u,2]]
   }
   
-  #División por tonos con posible umbral
+  # Split by tones (threshold)
   l_espacio <- (max(Mpos)-min(Mpos))/5
   Umbral <- min(Mpos) + l_espacio*4
   Umbral <- round(Umbral,2)
@@ -36,28 +40,30 @@ P.Umbral <- function(im, Informacion, NumMask){
 }
 
 ##########################################################################
-# B value
+# Funtion to obtain the B value
+#Output: B Value
+
 P.B <-function(im, Informacion, NamMask){
   im <- im 
   Informacion <- Informacion
   NumMask <- NumMask
   
-  #Dimensiones de la máscara
+  # Dimensions of the masks
   resul <- dim.mask(im, Informacion, NumMask)
   lap <- resul$lap
   Esquinas <- resul$ESQUINAS
   
-  #Promedio de dimensiones 
+  # Avarages 
   p.lap <- c(mean(lap[,1]), mean(lap[,2]), mean(lap[,3]))
   
-  #Diferencia de dimensiones con respecto al promedio 
+  # Difference of dimensions with respect to the average 
   dif.lap <- sweep(lap,2,p.lap)
   
-  #considerar las máscaras más grandes que el valor promedio
+  # Bigger masks than the average
   indnoneg <- which((dif.lap[,3] > 0)==TRUE)
   noneg2 <- lap[indnoneg, 3]
   
-  #Promedio de éstas
+  # Avarage of the biggest masks
   mnoneg2 <- mean(noneg2)
   
   dnoneg2 <- NULL
