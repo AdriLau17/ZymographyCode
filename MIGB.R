@@ -1,10 +1,14 @@
 # MIGB 
-#	s - Number of adjusted gaussians
-#	datos - dataframe in dimension 2
-#	mui - initial values matrix for the means |x|y| (s rows)
-#	sigmai - initial values matrix for the standard deviation (idem mu)
-#	pri - initial values vector for the mixture proportions
-
+# GI algorithm for a 2-dimensional data set
+#Inputs:
+#	  s - Number of adjusted gaussians
+#	  datos - dataframe in dimension 2
+#	  mui - initial values matrix for the means |x|y| (s rows)
+#	  sigmai - initial values matrix for the standard deviation (idem mu)
+#	  pri - initial values vector for the mixture proportions
+#Outputs:
+#   R - vector with the calculated parameters  (s vectors for the means, s vectors for the covariance matrices)
+#   pr - vector with s values for the mixture proportions
 
 MIGB <- function(s, datos, mui, sigmai, pri){
   s <- s
@@ -29,8 +33,6 @@ MIGB <- function(s, datos, mui, sigmai, pri){
       sigmac <- sigma
       prc <- pr
       valc <- c(as.vector(muc), as.vector(sigmac))
-      #print(cont)
-      #print(as.numeric(dist(rbind(val, valc))))
       
       #Process in each column
       G<-NULL
