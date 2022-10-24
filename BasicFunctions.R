@@ -1,14 +1,14 @@
 # BASIC FUNCTIONS
 
 # General function (Process) 
-# In:
+# Inputs:
 # im - image
-#	Informacion - matlab information
+#	Informacion - matlab information (.mat of Zimoquant application)
 #	NumMask - Number of masks
-#	B - Number of bigger masks
+#	B - Number of biggest masks
 #	Um - Umbral
 
-# Out:    TO - Table 
+# Output:    TO - Table 
 #			| Proportions | Width | Lenght | Pixels | Class
 #		Graphics (considered pixels and classes of the masks)
 
@@ -19,10 +19,10 @@ Methodology <- function(im, Informacion, NumMask, B, Um){
   B <- B
   Um <- Um
   
-  #Para las etiquetas de identificación
+  # For identification labels
   Letters <- c(LETTERS,letters)[1:NumMask]
   
-  #Para calcular los puntos centrales de las máscaras
+  # Central points of the masks
   medias<-matrix(ncol=2, nrow=NumMask)
   for(w in 1:NumMask){
     mask <- t(Informacion$mascaras[,, w])
@@ -34,13 +34,13 @@ Methodology <- function(im, Informacion, NumMask, B, Um){
   Perfil.mascaras(im, Informacion, NumMask)	
   text(x=medias[,1],y=medias[,2], labels=Letters, col="blue", cex=0.85)
   print("perfiles")
-  #x11()
-  #Matriz lp de dimensiones de cada máscara  | largo | ancho | num. pixeles |
+
+  # Matrix lp of dimensions of each mask  | length | width | number of pixels |
   LAP <- dim.mask(im, Informacion, NumMask)
   lp <- LAP$lap
   
   if(B!=0){
-    #Identificar las B máscaras más grandes
+    # Identify the biggest B masks
     OrdenPMask <- sort(lp[,3], decreasing = TRUE)
     Bmask <- OrdenPMask[1:B]
     BMask <- NULL
@@ -52,23 +52,25 @@ Methodology <- function(im, Informacion, NumMask, B, Um){
     letras <- Letters[BMask2]
     Letters <- Letters[-BMask2]
     
-    #Encontrar los pixeles en las máscaras por debajo del umbral marcado
-    #sin considerar las máscaras más grandes
+    # Find the pixels in the masks below the marked threshold without considering the largest masks
     pixe <- Pos.MaskUmbral(im, Um, NumMask, Informacion, BMask)
     print("Identification of the interest pixels set P complete.")
-    #Ajuste de las Gaussianas sin considerar las B máscaras más grandes
+    
+    # Adjustment of the Gaussians without considering the B biggest masks
     Resultados <- Ajuste.Umbral(pixe, NumMask, Informacion, "Si", BMask)
     Resultados
     print("Gaussian fitting with the GI algorithm complete.")
-    #Ordenar las máscaras con respecto a los valores de pr
+    
+    # Sort the masks with respect to pr values
     IM <- Identificar.Mascara(Informacion, NumMask, Resultados, BMask)
     print("Ordering")
-    #Obtener tabla con proporciones, ancho, largo, pixeles y etiqueta ordenados
+    
+    # Get table with proportions, width, height, pixels and ordered labels
     lp <- lp[-BMask,]
     TO <- Tabla.Ordenada(lp, IM, NumMask, BMask)
     letras2 <- Letters[IM$mascaras.or]		
     
-    #Agregar a la tabla las máscaras ya clasificadas
+    # Add the classified masks to the table
     if(B==1){
       to <- c(1,LAP$lap[BMask2,], as.numeric(unlist(Informacion$puntajes[BMask2])))
       to <- matrix(to, nrow=1)
@@ -80,38 +82,38 @@ Methodology <- function(im, Informacion, NumMask, B, Um){
     names(to)<- c("Proporciones", "Ancho", "Largo", "Pixeles", "Clase")
     TO <- rbind(to, TO)
     
-    #Normalizar las proporciones de la tabla TO
+    # Normalize TO Table Proportions
     TO[,1]<-TO$Proporciones / sum(TO$Proporciones)
     
-    #Agregar etiquetas para identificación
+    # Add labels for identification
     Etiquetas <- c(letras, letras2)
     TO <- cbind(Etiquetas,TO)
     
-    #Tabla resultado
+    # Table of results
     TO2 <- cbind(TO[1],TO[2]*100, TO[6])
     names(TO2)<- c("Spot", "Proportions", "Class")
     
   }else{
     BMask <- NULL
     
-    #Encontrar los pixeles en las máscaras por debajo del umbral marcado
+    # Find the pixels in the masks below the marked threshold without considering the largest masks
     pixe <- Pos.MaskUmbral(im, Um, NumMask, Informacion, BMask)
     
-    #Ajuste de las Gaussianas sin considerar las B máscaras más grandes
+    # Adjustment of the Gaussians
     Resultados <- Ajuste.Umbral(pixe, NumMask, Informacion, "Si", BMask)
     Resultados
     
-    #Ordenar las máscaras con respecto a los valores de pr
+    # Sort the masks with respect to pr values
     IM <- Identificar.Mascara(Informacion, NumMask, Resultados, BMask)
     
-    #Obtener tabla con proporciones, ancho, largo, pixeles y etiqueta ordenados
+    # Get table with proportions, width, height, pixels and ordered labels
     TO <- Tabla.Ordenada(lp, IM, NumMask, BMask)
     
-    #Agregar etiquetas para identificación
+    # Add labels for identification
     Etiquetas <- Letters[IM$mascaras.or]
     TO <- cbind(Etiquetas,TO)
     
-    #Tabla resultado
+    # Table of results
     TO2 <- cbind(TO[1],TO[2]*100, TO[6])
     names(TO2)<- c("Spot", "Proportions", "Class")
   }
@@ -128,7 +130,7 @@ Perfil.mascaras <- function(im, Informacion, NumMask){
   
   dIm <- dim(im)
   
-  #Matriz de largo, ancho y número de pixeles
+  # Array of length, width and number of pixels
   lap <- matrix(nrow=NumMask, ncol=3)
   ESQUINAS <- matrix(nrow=NumMask, ncol=8)
   for(r in 1:NumMask){
@@ -144,8 +146,7 @@ Perfil.mascaras <- function(im, Informacion, NumMask){
     
     ESQUINAS[r,] <- c(esquinas[1,], esquinas[2,], esquinas[3,], esquinas[4,])
   }
-  
-  #plot(im)
+
   for(w in 1:NumMask){
     segments(ESQUINAS[w,1], ESQUINAS[w,2],ESQUINAS[w,3],ESQUINAS[w,4])
     segments(ESQUINAS[w,5], ESQUINAS[w,6],ESQUINAS[w,7],ESQUINAS[w,8])
@@ -156,14 +157,13 @@ Perfil.mascaras <- function(im, Informacion, NumMask){
 
 ##############################################################################
 #Find the dimensions and the number of pixels of each mask
-#In: 
+#Inputs: 
 #	im - image
 #	Informacion - matlab information
 #	NumMask - Number of masks
-#Out: lap matrix with the dimensions of each mask
-#    			|  Lenght  | Width | Number of Pixels |
-#	  ESQUINAS matrix with the points that are corners of each mask
-#		|x1|y1|x2|y2|x3|y3|x4|y4|
+#Outputs: 
+# lap matrix with the dimensions of each mask 			|  Lenght  | Width | Number of Pixels |
+#	ESQUINAS matrix with the points that are corners of each mask   |x1|y1|x2|y2|x3|y3|x4|y4|
 
 dim.mask <- function(im, Informacion, NumMask){
   im <- im
@@ -171,9 +171,8 @@ dim.mask <- function(im, Informacion, NumMask){
   NumMask <- NumMask
   
   dIm <- dim(im)
-  #plot(im)
   
-  #Matriz de largo, ancho y número de pixeles
+  # Array of length, width and number of pixels
   lap <- matrix(nrow=NumMask, ncol=3)
   ESQUINAS <- matrix(nrow=NumMask, ncol=8)
   for(r in 1:NumMask){
@@ -188,9 +187,7 @@ dim.mask <- function(im, Informacion, NumMask){
     esquinas[,2] <- c(ejey[1], ejey[2], ejey[1], ejey[2])
     
     lap[r,] <- c(dist(ejex),  dist(ejey), dim(xy)[1])
-    
-    #points(esquinas[,1], esquinas[,2], col="blue", pch=20)
-    
+      
     ESQUINAS[r,] <- c(esquinas[1,], esquinas[2,], esquinas[3,], esquinas[4,])
   }
   lista <- list("lap" = lap, "ESQUINAS" = ESQUINAS)
@@ -207,10 +204,10 @@ Pos.MaskUmbral <- function(im, Um, NumMask, Informacion, BMask){
   Informacion <- Informacion
   BMask <- BMask 
   
-  #Matriz de tonos de grises
+  # Grayscale tone matrix
   M <- imageData(im)[,,1]
   
-  #No seleccionar las posiciones de los pixeles de las máscaras más grandes
+  # Do not select the pixel positions of the biggest masks
   if(length(BMask)!=0){
     qmask <- matrix(0, ncol=dim(im)[2], nrow=dim(im)[1])
     for(w in 1:length(BMask)){
@@ -218,7 +215,7 @@ Pos.MaskUmbral <- function(im, Um, NumMask, Informacion, BMask){
     }
     q.pixels <- which(qmask==1, arr.ind=TRUE)
     
-    #Segunda opción
+    # Second option
     x <- 1:NumMask
     x <- x[-BMask]
     
@@ -241,16 +238,16 @@ Pos.MaskUmbral <- function(im, Um, NumMask, Informacion, BMask){
   for(u in 1:dimp){
     Mpos[u] <- M[pos.pixels[u,1], pos.pixels[u,2]]
   }
-  #Juntar la posición con su correspondiente tono en M	
+  # Position with its corresponding tone in M	
   datos <- cbind(pos.pixels, Mpos)
   
-  #Seleccionar los pixeles de los tonos menores al umbral
+  # Select the pixels of the tones lower than the threshold
   pix <- which(Mpos<Um)
   datos2 <- datos[pix,]
   pix <- NULL
   pix <- datos2[,1:2]
   
-  #Para calcular los puntos centrales de las máscaras
+  # Calculate the center points of the masks
   medias<-matrix(ncol=2, nrow=NumMask)
   for(w in 1:NumMask){
     mask <- t(Informacion$mascaras[,, w])
@@ -260,26 +257,6 @@ Pos.MaskUmbral <- function(im, Um, NumMask, Informacion, BMask){
     medias[w,]<-c(mx,my)
   }
   
-  #Gráficas
-  #par(mfrow=c(1,2)) 
-  #plot(im)
-  #labelsm <- unlist(Informacion$puntajes)
-  #text(x=medias[,1],y=medias[,2], labels=labelsm, col="red", cex=1.5)
-  
-  #dIm <- dim(M)
-  #if(dIm[1]>dIm[2]){
-  #  x <- seq(1:dIm[1])
-  #  y <- c(seq(1:dIm[2]),seq(1:(dIm[1]-dIm[2])))
-  #  plot(x,-y, col="white",main=paste("Menor que ", Um),asp=1)
-  #}else{if(dIm[1]==dIm[2]){
-  #  x <- seq(1:dIm[1])
-  #  plot(x,-x,col="white",main=paste("Menor que ", Um),asp=1)
-  #}else{
-  #  x <- c(seq(1:dIm[1]),seq(1:(dIm[2]-dIm[1])))
-  #  y <- seq(1:dIm[2])
-  #  plot(x,-y, col="white",main=paste("Menor que ", Um),asp=1)
-  #}
-  #}
   points(pix[,1], -pix[,2], col="black", pch=20)
   if(length(BMask)!=0){
     points(q.pixels[,1], -q.pixels[,2], col="gray", pch=20)
@@ -291,12 +268,12 @@ Pos.MaskUmbral <- function(im, Um, NumMask, Informacion, BMask){
 
 ###############################################################################
 #Adjust NumMask gaussians in the data set pixe
-#In: 	
+#Inputs: 	
 #   pixe - posicion matrix
 #		NumMask - Number of masks
 #		Informacion - matlab information
 #		Usomu - Si o No (Use of means)
-#Out:	
+#Outputs:	
 #   mus - means matrix
 #		sigmas - standard deviations matrix
 #		pr - mixture proportions
@@ -337,11 +314,10 @@ Ajuste.Umbral <- function(pixe, NumMask, Informacion, Usomu, BMask){
   sigmai<-matrix(sig.in,s,2)
   pri <- rep(1/s,s)
   
-  #print("Valores mu, sigma, pr")
   Salida <- MIGB(s, pixe, mui, sigmai, pri)
   R <- Salida$R
   pr <- Salida$pr
-  print("Obtención de resultados")
+  print("ObtenciÃ³n de resultados")
   mus <- R[1:(length(R)/2)]
   mus <- matrix(mus, s,2)
   sigmas <- R[(length(R)/2 + 1): length(R)]
@@ -353,7 +329,7 @@ Ajuste.Umbral <- function(pixe, NumMask, Informacion, Usomu, BMask){
 
 ################################################################################
 #Identify masks with the ordered proportions
-#In:
+#Inputs:
 #	Informacion - matlab information
 #	NumMask - Number of masks
 #	Resultados - Vector of results
@@ -382,9 +358,7 @@ Identificar.Mascara <- function(Informacion, NumMask, Resultados, BMask){
   for(w in 1:(NumMask-nc)){
     sigmas.or[w,] <- sigmas[pos[w],]
   }
-  
-  #Identificar máscara con ayuda de las medias
-  #Puntos centrales de las máscaras
+
   medias<-matrix(ncol=2, nrow=NumMask)
   for(w in 1:NumMask){
     mask <- t(Informacion$mascaras[,, w])
