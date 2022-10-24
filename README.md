@@ -13,7 +13,7 @@ B) Run the functions of the following files: (IMPORTANT: Ctrl + Alt + R – Runs
   
 	2- Background.R - Function for background analysis
   
-	2- UmB.R  - Functions to obtain the Umbral value "Um" and the "B" value
+	2- UmB.R  - Functions to obtain the threshold value "Um" and the "B" value
   
 	3- BasicFunctions - Functions used to perform the steps of the proposed methodology
 
