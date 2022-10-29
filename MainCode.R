@@ -7,17 +7,18 @@ library(mixtools)
 
 ############################### Image processing ###############################
 
-# Load the image (.jpg file) and the masks information (.mat file)
+# Load the image (Gel.jpg file) and the masks information (Gel.mat file) 
+# In the main folder of this repository there are two sample files: Gel.jpg and Gel.mat.
 # IMPORTANT: To upload the information with the following instructions, the files 
 # must be saved in your documents folder or you must specify the working 
 # directory where the files are located, for example:
-# readImage("C:/User/Data/Images/Gel 2 (recortado) 24-06-19.jpg")
+# readImage("C:/User/Data/Images/Gel.jpg")
 # Note that you must use forward slash "/" 
 
-im <- readImage("Gel 2 (recortado) 24-06-19.jpg")
+im <- readImage("Gel.jpg")
 plot(im)
 
-Informacion <- readMat("Gel 2 (recortado) 24-06-19.mat")
+Informacion <- readMat("Gel.mat")
 NumMask <- length(Informacion$puntajes)
 
 colorMode(im) = Grayscale
