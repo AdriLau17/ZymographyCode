@@ -5,7 +5,7 @@
 # im - image
 #	Informacion - matlab information (.mat of Zimoquant application)
 #	NumMask - Number of masks
-#	B - Number of biggest masks
+#	B - Number of largest masks
 #	Um - Umbral
 
 # Output:    TO - Table 
@@ -40,7 +40,7 @@ Methodology <- function(im, Informacion, NumMask, B, Um){
   lp <- LAP$lap
   
   if(B!=0){
-    # Identify the biggest B masks
+    # Identify the largest B masks
     OrdenPMask <- sort(lp[,3], decreasing = TRUE)
     Bmask <- OrdenPMask[1:B]
     BMask <- NULL
@@ -56,7 +56,7 @@ Methodology <- function(im, Informacion, NumMask, B, Um){
     pixe <- Pos.MaskUmbral(im, Um, NumMask, Informacion, BMask)
     print("Identification of the interest pixels set P complete.")
     
-    # Adjustment of the Gaussians without considering the B biggest masks
+    # Adjustment of the Gaussians without considering the B largest masks
     Resultados <- Ajuste.Umbral(pixe, NumMask, Informacion, "Si", BMask)
     Resultados
     print("Gaussian fitting with the GI algorithm complete.")
@@ -195,7 +195,7 @@ dim.mask <- function(im, Informacion, NumMask){
 }
 
 ###############################################################################
-# Pixels positions that are obtained after applying the umbral (Graphic)
+# Pixels positions that are obtained after applying the threshold (Graphic)
 
 Pos.MaskUmbral <- function(im, Um, NumMask, Informacion, BMask){
   im <- im 
@@ -207,7 +207,7 @@ Pos.MaskUmbral <- function(im, Um, NumMask, Informacion, BMask){
   # Grayscale tone matrix
   M <- imageData(im)[,,1]
   
-  # Do not select the pixel positions of the biggest masks
+  # Do not select the pixel positions of the largest masks
   if(length(BMask)!=0){
     qmask <- matrix(0, ncol=dim(im)[2], nrow=dim(im)[1])
     for(w in 1:length(BMask)){
